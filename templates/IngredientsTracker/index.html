@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+{#    <script src="https://cdn.tailwindcss.com"></script>#}
+    <title>Ingredient Tracker</title>
+</head>
+<body>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="flex flex-col">
+            <div>
+                <p>Barcode</p>
+                {{ form.barcode }}
+            </div>
+            <div>
+                <p>Ingredient Name</p>
+                {{ form.name }}
+            </div>
+            <div>
+                <p>Ingredient Description</p>
+                {{ form.description }}
+            </div>
+        </div>
+        <input type="submit" value=Submit">
+    </form>
+</body>
+</html>

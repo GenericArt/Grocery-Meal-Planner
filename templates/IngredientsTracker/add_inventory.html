@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.js"></script>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        async function check_barcode_entry() {
+            let input_field = document.getElementById('id_barcode_input').value;
+            const csrftoken = Cookies.get('csrftoken');
+
+            fetch('{% url 'check_scanned_barcode' %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    'text': 'My Foobar',
+                    'barcode': input_field,
+                }),
+            }).then(response => {
+                let result = response.json();
+                let status_code = response.status;
+
+                if (status_code !== 200) {
+                    console.log('Error in checking barcode in db');
+                    return false;
+                }
+
+                return result
+            }).then(result => {
+                console.log(result);
+
+                // Do something with the result
+
+            }).catch(error => {
+                console.log(error)
+            })
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="m-4">
+        <label for="id_barcode_input">Barcode Input: </label>
+        <input id="id_barcode_input" class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <br><br>
+        <button onclick="check_barcode_entry()"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg">
+            Enter Barcode
+        </button>
+        <br><br>
+    </div>
+    <hr>
+
+{% endblock %}

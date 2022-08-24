@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <title>Add New Ingredients</title>
+</head>
+<script>
+
+    function initialize_scanner() {
+        console.log("Initializing Quagga");
+
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector('#viewport'),    // Or '#yourElement' (optional)
+                constraints: {
+                    width: 640,
+                    height: 480,
+                    {#aspectRatio: 1#}
+                    {#facingMode: "user"  //"environment" for back camera, "user" front camera#}
+                }
+            },
+            locator: {
+                patchSize: "large",
+                halfSample: false,
+            },
+            numOfWorkers: 4,
+            frequency: 5,
+            locate: true,
+            multiple: false,
+            {#debug: {#}
+            {#    drawBoundingBox: true,#}
+            {#    showFrequency: true,#}
+            {#    drawScanline: true,#}
+            {#    showPattern: true#}
+            decoder: {
+                readers: ["upc_reader"]
+            }
+        }, function (err) {
+            if (err) {
+                console.log(err);
+                return
+            }
+            console.log("Initialization finished. Ready to start");
+            Quagga.start();
+
+            Quagga.onDetected(function (result) {
+                console.log("ANYTHING?!!");
+                var last_code = result.codeResult.code;
+                console.log("last_code ");
+                console.log(last_code);
+            });
+
+        });
+        console.log("Completed initializing Quagga");
+    }
+
+    function start_on_detect() {
+        console.log("On Detected Start");
+        Quagga.onDetected(function (result) {
+            console.log("ANYTHING?!");
+            var code = result.codeResult.code;
+            console.log(code);
+            console.log("I detected something");
+            document.getElementById("output").innerHTML = result.codeResult.code;
+
+        });
+
+        console.log("On Detected End");
+    }
+
+    function start_on_processing() {
+        Quagga.onProcessed(result => {
+            console.log("I processed something");
+        });
+    }
+
+    function add_value_to_input() {
+        input_field = document.getElementById('id_barcode');
+        input_field.value = 1234567;
+    }
+
+    async function check_barcode_entry() {
+        let input_field = document.getElementById('id_barcode_input').value;
+        const csrftoken = Cookies.get('csrftoken');
+
+        fetch('{% url 'check_scanned_barcode' %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                'text': 'My Foobar',
+                'barcode': input_field,
+            }),
+        }).then(response => {
+            let result = response.json();
+            let status_code = response.status;
+
+            if (status_code !== 200) {
+                console.log('Error in checking barcode in db');
+                return false;
+            }
+
+            return result
+        }).then(result => {
+            console.log(result);
+
+            // Do something with the result
+
+        }).catch(error => {
+            console.log(error)
+        })
+    }
+
+</script>
+<body>
+
+<label for="id_barcode_input">Barcode Input: </label><input id="id_barcode_input">
+<br><br>
+<button onclick="check_barcode_entry()">Enter Barcode</button>
+<br><br>
+<hr>
+
+<button onclick="start_on_detect()">Start On Detect</button>
+<button onclick="start_on_processing()">Start On Processing</button>
+<button onclick="add_value_to_input()">Add Input Value</button>
+<form action="{% url 'barcode_scanned' %}" method="post">
+    {% csrf_token %}
+    <div class="flex flex-col">
+        <div>
+            <p>Barcode</p>
+            {{ form.barcode }}
+        </div>
+    </div>
+    <input type="submit" value=Submit">
+</form>
+<div id="viewport-id">
+    <div id="viewport"></div>
+</div>
+<hr>
+<div id="output">None</div>
+
+<button onclick="initialize_scanner()">Load Scanner</button>
+
+</body>
+</html>
