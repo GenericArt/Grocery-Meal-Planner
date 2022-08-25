@@ -13,13 +13,24 @@ class Store(models.Model):
         managed = True
 
 
+class IngredientCategory(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200)
+
+    class Meta:
+        ordering = ['id']
+        db_table = 'ingredient_category'
+        managed = True
+
+
 class IngredientItem(models.Model):
     id = models.AutoField(primary_key=True)
+    ingredient_id = models.IntegerField(null=True)
     barcode = models.CharField(max_length=20)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True)
+    category = models.ForeignKey(IngredientCategory, related_name='category_name', on_delete=models.CASCADE)
     default_quantity = models.FloatField(null=True)
-    # store_id = models.ForeignKey(Store, related_name='store', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['id']

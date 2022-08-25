@@ -33,9 +33,6 @@ def check_scanned_barcode(request):
         else:
             exists = False
 
-            # todo Need to Redirect with the Barcode and Quantity to add new Ingredient Item to db
-            pass
-
         context = {
             'msg': 'This was posted: {}'.format(scanned_barcode),
             'exists': exists,
@@ -45,8 +42,40 @@ def check_scanned_barcode(request):
         return JsonResponse(context, status=200)
 
 
-def add_new_ingredient(barcode):
-    pass
+def add_new_ingredient(request):
+    if request.method == 'POST':
+        post_data = json.loads(request.body.decode("utf-8"))
+
+        barcode_nbr = str(post_data['barcode']).strip()
+        barcode_name = str(post_data['name']).strip()
+        barcode_qty = int(str(post_data['quantity']).strip())
+        barcode_desc = str(post_data['description']).strip()
+        barcode_expire = str(post_data['expire_date']).strip()
+
+        # Check if needed information exists before adding to the database
+        if not barcode_nbr or not barcode_name:
+            return JsonResponse({'server_msg': 'Missing either the barcode number or name'}, status=422)
+        else:
+            new_item_entry = IngredientItem.objects.create(
+                barcode=barcode_nbr,
+                name=barcode_name,
+                default_quantity=barcode_qty,
+                description=barcode_desc,
+            )
+            new_item_entry.save()
+            new_item_entry.ingredient_id = new_item_entry.id
+            new_item_entry.save()
+
+            new_inventory = IngredientInventory.objects.create(
+                ingredient_id=new_item_entry,
+                quantity=barcode_qty,
+                expiration_date=barcode_expire,
+            )
+            new_inventory.save()
+
+            return JsonResponse({'server_msg': 'Added new item successfully'}, status=200)
+
+    return JsonResponse({'server_msg': 'This should have been a POST request but was not'}, status=401)
 
 
 def barcode_scanned(request):
