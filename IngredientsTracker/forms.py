@@ -22,3 +22,8 @@ class IngredientItemForm(forms.ModelForm):
 class BarcodeScanner(forms.Form):
     barcode = forms.CharField(max_length=50, required=True)
     # quantity = forms.FloatField(required=True)
+
+
+class LoginForm(forms.Form):
+    email = forms.EmailInput()
+    password = forms.PasswordInput()

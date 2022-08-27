@@ -35,9 +35,15 @@ class UserManager(BaseUserManager):
 
 class UserAuth(AbstractUser):
     username = None
+
+    user_id = models.IntegerField(null=True)
     email = models.EmailField(_('email address'), unique=True)
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
+    shared_account = models.BooleanField(null=True, default=False)
+    shared_account_id = models.IntegerField(null=True)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = [first_name, last_name]

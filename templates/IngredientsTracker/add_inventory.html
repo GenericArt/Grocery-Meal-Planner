@@ -133,6 +133,11 @@
             Enter Barcode
         </button>
         <br><br>
+        <form action="{% url 'log_user_out' %}" method="GET">
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg m-4">
+                Logout
+            </button>
+        </form>
     </div>
 
     <div id="id_new_item_div" style="display: none"
@@ -172,6 +177,12 @@
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg m-4">
             Submit
         </button>
+
+        <form action="{% url 'log_user_out' %}" method="GET">
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg m-4">
+                Logout
+            </button>
+        </form>
     </div>
     <div id="id_confirm_item_div">
 

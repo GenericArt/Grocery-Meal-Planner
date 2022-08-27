@@ -1,7 +1,15 @@
-from .models import IngredientCategory, IngredientIcon, AppFeatureList
+from .models import IngredientCategory, IngredientIcon, AppFeatureList, UserFeatureList
+from Users.models import UserAuth
 from django.conf import settings
 import os, tempfile
 from django.contrib.auth import get_user_model
+
+
+def run_all_intializations():
+    create_default_item_categories()
+    create_default_app_features_list()
+    create_test_user()
+    set_test_user_features()
 
 
 def create_default_item_categories():
@@ -32,6 +40,22 @@ def create_test_user():
     user.is_superuser = False
     user.is_staff = False
     user.save()
+
+    user.user_id = user.id
+    user.save()
+
+
+def set_test_user_features():
+    test_user = UserAuth.objects.get(email='manley@me.com')
+    all_features = AppFeatureList.objects.all()
+
+    for feature in all_features:
+        new_entry = UserFeatureList.objects.create(
+            user_id=test_user.user_id,
+            feature=feature,
+            enabled=False
+        )
+        new_entry.save()
 
 
 def create_default_item_icons():

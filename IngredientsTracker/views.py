@@ -1,14 +1,48 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, Http404
 from django.http import JsonResponse
 import json
-from .forms import BarcodeScanner
+from .forms import BarcodeScanner, LoginForm
 from .models import IngredientItem, IngredientInventory, IngredientCategory
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 
 
+@login_required(login_url='/loginpage')
 def index(request):
     context = {'form': BarcodeScanner()}
     return render(request, "IngredientsTracker/add_inventory.html", context)
+
+
+def login_page(request):
+    context = {'login_form': LoginForm}
+    msg = request.session['msg']
+
+    if msg:
+        context['msg'] = msg
+    else:
+        context['msg'] = ''
+
+    return render(request, 'IngredientsTracker/login_page.html', context)
+
+
+def validate_user_login(request):
+    if request.method == 'POST':
+        user_email = request.POST.get('user_email', '')
+        user_password = request.POST.get('user_password', '')
+
+        user = authenticate(request, email=user_email, password=user_password)
+        if user is not None:
+            login(request, user)
+            return redirect('/')
+        else:
+            request.session['msg'] = 'Oops! Wrong credentials!'
+            return redirect('login_page')
+
+
+def log_user_out(request):
+    logout(request)
+    return redirect('/loginpage')
 
 
 @csrf_exempt
