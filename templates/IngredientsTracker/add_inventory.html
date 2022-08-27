@@ -10,9 +10,9 @@
 
         async function check_barcode_entry() {
             let input_field_value = document.getElementById('id_barcode_input').value;
-
             fetch('{% url 'check_scanned_barcode' %}', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
@@ -41,6 +41,15 @@
                     initial_input_div.style.display = 'none';
                     new_input_div.style.display = 'block';
                     new_barcode_input.value = input_field_value;
+
+                    let category_select = document.getElementById('id_new_item_categories');
+                    for (const val of result['categories']) {
+                        let option = document.createElement("option");
+                        option.value = val;
+                        option.text = val;
+                        category_select.add(option);
+                        console.log(val);
+                    }
                 } else {
 
                 }
@@ -56,13 +65,17 @@
             let barcode_qty = document.getElementById('id_new_barcode_qty').value;
             let barcode_desc = document.getElementById('id_new_barcode_desc').value;
             let barcode_expire = document.getElementById('id_new_barcode_expire').value;
+            let barcode_category = document.getElementById('id_new_item_categories').value;
+            let barcode_cost = document.getElementById('id_new_item_cost').value;
 
-            if (!barcode_nbr || !barcode_name || !barcode_expire) {
-                alert("You need at minimum the Barcode number, Name and Expiry Date of the item you are entering");
+            if (!barcode_nbr || !barcode_name || !barcode_expire || barcode_category) {
+                alert("You need at minimum the Barcode Number, Name, Category and Expiry Date of the item you " +
+                    "are entering");
             } else {
 
                 fetch('{% url 'add_new_item' %}', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': csrftoken
@@ -73,6 +86,7 @@
                         'description': barcode_desc,
                         'quantity': barcode_qty,
                         'expire_date': barcode_expire,
+                        'category': barcode_category,
                     }),
                 }).then(response => {
                     let result = response.json();
@@ -128,20 +142,31 @@
         <p class="mb-2">As this item has not been scanned by you before, please fill in the quantity and optionally a
             description of
             it.</p>
-        <label for="id_new_barcode_nbr" class="my-2">Barcode: </label><input id="id_new_barcode_nbr" type="text"
-                                                                             class="my-2 rounded" required>
-        <br>
+        <div id="id_new_barcode_nbr_div" style="display: block">
+            <label for="id_new_barcode_nbr" class="my-2">Barcode: </label><input id="id_new_barcode_nbr" type="text"
+                                                                                 class="my-2 rounded" required>
+
+            <br>
+        </div>
         <label for="id_new_barcode_name">Name: </label><input id="id_new_barcode_name" type="text"
                                                               class="rounded my-4" required>
         <br>
         <label for="id_new_barcode_desc">Description: </label><input id="id_new_barcode_desc" type="text"
+                                                                     placeholder="Optional..."
                                                                      class="rounded my-4">
         <br>
         <label for="id_new_barcode_qty">Quantity: </label><input id="id_new_barcode_qty" type="number"
                                                                  class="rounded my-4">
         <br>
+        <label for="id_new_barcode_cost">Cost: </label><input id="id_new_barcode_cost" type="number"
+                                                              class="rounded my-4">
+        <br>
         <label for="id_new_barcode_expire">Expiry Date: </label><input id="id_new_barcode_expire" type="date"
-                                                                 class="rounded my-4" required>
+                                                                       class="rounded my-4" required>
+        <br>
+        <label for="id_new_item_categories">Choose Category:</label>
+        <select name="id_new_item_categories" id="id_new_item_categories" class="rounded">
+        </select>
         <br>
         <button onclick="add_new_barcode()"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg m-4">
