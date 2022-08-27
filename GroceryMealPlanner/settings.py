@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'IngredientsTracker',
+    'Users',
     'tailwind',
     'tailwind_theme',
     'django_browser_reload',
@@ -105,6 +106,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'Users.UserAuth'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

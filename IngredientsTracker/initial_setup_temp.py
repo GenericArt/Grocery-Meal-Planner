@@ -1,7 +1,7 @@
 from .models import IngredientCategory, IngredientIcon, AppFeatureList
 from django.conf import settings
-# from django.core.files.images import ImageFile, File
 import os, tempfile
+from django.contrib.auth import get_user_model
 
 
 def create_default_item_categories():
@@ -24,6 +24,14 @@ def create_default_app_features_list():
             description=desc
         )
         new_entry.save()
+
+
+def create_test_user():
+    User = get_user_model()
+    user = User.objects.create_user(email='manley@me.com', password='foobar')
+    user.is_superuser = False
+    user.is_staff = False
+    user.save()
 
 
 def create_default_item_icons():
