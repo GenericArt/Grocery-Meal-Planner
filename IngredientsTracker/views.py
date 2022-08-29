@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 
 
-@login_required(login_url='/loginpage')
+@login_required(login_url='loginpage/')
 def index(request):
     context = {'form': BarcodeScanner()}
     return render(request, "IngredientsTracker/add_inventory.html", context)
