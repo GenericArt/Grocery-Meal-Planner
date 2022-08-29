@@ -2,10 +2,11 @@ from django.shortcuts import render, redirect, Http404
 from django.http import JsonResponse
 import json
 from .forms import BarcodeScanner, LoginForm
-from .models import IngredientItem, IngredientInventory, IngredientCategory
+from .models import IngredientItem, IngredientInventory, IngredientCategory, UserFeatureList
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from rest_framework import status
 
 
 @login_required(login_url='loginpage/')
@@ -47,33 +48,43 @@ def log_user_out(request):
 
 @csrf_exempt
 def check_scanned_barcode(request):
-    if request.method == 'POST':
-        post_data = json.loads(request.body.decode("utf-8"))
-        print(post_data)
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            post_data = json.loads(request.body.decode("utf-8"))
+            print(post_data)
 
-        scanned_barcode = str(post_data['barcode']).strip()
-        item_info = {}
+            scanned_barcode = str(post_data['barcode']).strip()
+            item_info = {}
 
-        # check if barcode exists
-        check_barcode_exist = IngredientItem.objects.filter(barcode=scanned_barcode).values()
-        if check_barcode_exist:
-            exists = True
+            user_id = request.user.id
+            user_features = UserFeatureList.objects.filter(id=user_id, enabled=True)
+            user_features_list = [x.feature.feature_name for x in user_features]
 
-            # todo Take in only Barcode and check for a default Quantity. Then always provide a pop confirmation
-            '''A better idea may be to not use a Django Form and then just use Javascript to check if the
-            barcode exists and get the default quantity. Then ask user if this is right and then submit to db'''
+            # check if barcode exists
+            check_barcode_exist = IngredientItem.objects.filter(barcode=scanned_barcode).values()
+            if check_barcode_exist:
+                exists = True
 
+                # todo Take in only Barcode and check for a default Quantity. Then always provide a pop confirmation
+                '''A better idea may be to not use a Django Form and then just use Javascript to check if the
+                barcode exists and get the default quantity. Then ask user if this is right and then submit to db'''
+
+            else:
+                exists = False
+
+            context = {
+                'msg': 'This was posted: {}'.format(scanned_barcode),
+                'exists': exists,
+                'item_info': item_info,
+                'categories': list(IngredientCategory.objects.all().values_list('name', flat=True)),
+                'user_features_list': user_features_list,
+            }
+
+            return JsonResponse(context, status=200)
         else:
-            exists = False
-
-        context = {
-            'msg': 'This was posted: {}'.format(scanned_barcode),
-            'exists': exists,
-            'item_info': item_info,
-            'categories': list(IngredientCategory.objects.all().values_list('name', flat=True))
-        }
-
-        return JsonResponse(context, status=200)
+            JsonResponse({'server_msg': 'Expected a POST'}, status=400)
+    else:
+        JsonResponse({'server_msg': 'User is not logged in'}, status=401)
 
 
 @csrf_exempt
