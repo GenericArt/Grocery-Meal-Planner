@@ -61,13 +61,18 @@ def check_scanned_barcode(request):
             user_features_list = [x.feature.feature_name for x in user_features]
 
             # check if barcode exists
-            check_barcode_exist = IngredientItem.objects.filter(barcode=scanned_barcode).values()
+            check_barcode_exist = IngredientItem.objects.filter(barcode=scanned_barcode, id=request.user.id)
             if check_barcode_exist:
                 exists = True
 
-                # todo Take in only Barcode and check for a default Quantity. Then always provide a pop confirmation
-                '''A better idea may be to not use a Django Form and then just use Javascript to check if the
-                barcode exists and get the default quantity. Then ask user if this is right and then submit to db'''
+                existing_item = check_barcode_exist[0]
+                item_info['name'] = existing_item.name
+                item_info['category'] = existing_item.category.name
+                item_info['default_quantity'] = existing_item.default_quantity
+                item_info['barcode'] = existing_item.barcode
+
+                if existing_item.description:
+                    item_info['description'] = existing_item.description
 
             else:
                 exists = False
@@ -106,6 +111,7 @@ def add_new_ingredient(request):
         else:
             category_instance = IngredientCategory.objects.get(name=barcode_category)
             new_item_entry = IngredientItem.objects.create(
+                user_id=request.user.id,
                 barcode=barcode_nbr,
                 name=barcode_name,
                 default_quantity=barcode_qty,
@@ -117,6 +123,7 @@ def add_new_ingredient(request):
             new_item_entry.save()
 
             new_inventory = IngredientInventory.objects.create(
+                user_id=request.user.id,
                 ingredient_id=new_item_entry,
                 quantity=barcode_qty,
                 expiration_date=barcode_expire,

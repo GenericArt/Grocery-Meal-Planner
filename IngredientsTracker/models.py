@@ -44,8 +44,7 @@ class IngredientIcon(models.Model):
 class IngredientItem(models.Model):
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField(null=True)
-    icon = models.ForeignKey(IngredientIcon, related_name='icon_data',
-                             on_delete=models.PROTECT)
+    icon = models.ForeignKey(IngredientIcon, null=True, related_name='icon_data', on_delete=models.PROTECT)
     ingredient_id = models.IntegerField(null=True)
     barcode = models.CharField(max_length=20)
     name = models.CharField(max_length=200)
