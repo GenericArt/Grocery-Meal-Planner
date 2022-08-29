@@ -42,6 +42,11 @@
                     new_input_div.style.display = 'block';
                     new_barcode_input.value = input_field_value;
 
+                    if ( result['user_features_list'].includes("cost_tracking")){
+                        let new_barcode_cost_div = document.getElementById('id_cost_div');
+                        new_barcode_cost_div.style.display = 'block';
+                    }
+
                     let category_select = document.getElementById('id_new_item_categories');
                     for (const val of result['categories']) {
                         let option = document.createElement("option");
@@ -163,9 +168,11 @@
         <label for="id_new_barcode_qty">Quantity: </label><input id="id_new_barcode_qty" type="number"
                                                                  class="rounded my-4">
         <br>
-        <label for="id_new_barcode_cost">Cost: </label><input id="id_new_barcode_cost" type="number"
-                                                              class="rounded my-4">
-        <br>
+        <div id="id_cost_div" style="display: none">
+            <label for="id_new_barcode_cost">Cost: </label><input id="id_new_barcode_cost" type="number"
+                                                                  class="rounded my-4">
+            <br>
+        </div>
         <label for="id_new_barcode_expire">Expiry Date: </label><input id="id_new_barcode_expire" type="date"
                                                                        class="rounded my-4" required>
         <br>
