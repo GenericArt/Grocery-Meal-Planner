@@ -17,7 +17,10 @@ def index(request):
 
 def login_page(request):
     context = {'login_form': LoginForm}
-    msg = request.session['msg']
+    try:
+        msg = request.session['msg']
+    except KeyError as e:
+        msg = None
 
     if msg:
         context['msg'] = msg
