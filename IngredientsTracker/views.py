@@ -123,13 +123,16 @@ def add_new_ingredient(request):
 
         barcode_nbr = str(post_data['barcode']).strip()
         barcode_name = str(post_data['name']).strip()
-        barcode_qty = int(str(post_data['quantity']).strip())
+        if post_data['quantity']:
+            barcode_qty = int(str(post_data['quantity']).strip())
+        else:
+            barcode_qty = 0
         barcode_desc = str(post_data['description']).strip()
         barcode_expire = str(post_data['expire_date']).strip()
         barcode_category = str(post_data['category']).strip()
 
         # Check if needed information exists before adding to the database
-        if not barcode_nbr or not barcode_name or not barcode_expire or not barcode_category:
+        if (not barcode_nbr and not barcode_name) or not barcode_expire or not barcode_category:
             return JsonResponse({'server_msg': 'Missing either the barcode number, expiry date, category or name'},
                                 status=422)
         else:
