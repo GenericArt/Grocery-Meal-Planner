@@ -8,80 +8,95 @@
     <script>
         const csrftoken = Cookies.get('csrftoken');
 
-        async function check_barcode_entry() {
-            let input_field_value = document.getElementById('id_barcode_input').value;
-            fetch('{% url 'check_scanned_barcode' %}', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken
-                },
-                body: JSON.stringify({
-                    'text': 'My Foobar',
-                    'barcode': input_field_value,
-                }),
-            }).then(response => {
-                let result = response.json();
-                let status_code = response.status;
+        async function check_initial_data_entry() {
 
-                if (status_code !== 200) {
-                    console.log('Error in checking barcode in db');
-                    return false;
-                }
+            let barcode_field_value = document.getElementById('id_barcode_input').value;
+            let name_field_value = document.getElementById('id_name_input').value;
 
-                return result
-            }).then(result => {
-                console.log(result);
+            if (barcode_field_value || name_field_value) {
 
-                let initial_input_div = document.getElementById('id_initial_scan_input');
-                let new_input_div = document.getElementById('id_new_item_div');
-                let new_barcode_input = document.getElementById('id_new_barcode_nbr');
+                fetch('{% url 'check_initial_data_entry' %}', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({
+                        'text': 'My Foobar',
+                        'barcode': barcode_field_value,
+                        'name': name_field_value,
+                    }),
+                }).then(response => {
+                    let result = response.json();
+                    let status_code = response.status;
 
-                if (result['user_features_list'].includes("cost_tracking")) {
-                    let new_barcode_cost_div = document.getElementById('id_cost_div');
-                    new_barcode_cost_div.style.display = 'block';
-                }
-
-                let category_select = document.getElementById('id_new_item_categories');
-                for (const val of result['categories']) {
-                    let option = document.createElement("option");
-                    option.value = val;
-                    option.text = val;
-                    category_select.add(option);
-                    console.log(val);
-                }
-
-                initial_input_div.style.display = 'none';
-                    new_input_div.style.display = 'block';
-                    new_barcode_input.value = input_field_value;
-
-                if (result['exists'] === true) {
-                    let item_info = result['item_info'];
-
-                    let barcode_nbr = document.getElementById('id_new_barcode_nbr');
-                    let barcode_name = document.getElementById('id_new_barcode_name');
-                    let barcode_qty = document.getElementById('id_new_barcode_qty');
-                    let barcode_category = document.getElementById('id_new_item_categories');
-                    let h2_header = document.getElementById('id_scanned_div_h2');
-
-                    barcode_name.value = item_info['name'];
-                    barcode_qty.value = item_info['default_quantity']
-                    barcode_category.value = item_info['category']
-                    barcode_nbr.value = item_info['barcode']
-
-                    h2_header.innerText = 'Previously Scanned Item';
-
-                    if (item_info['description']){
-                        let barcode_desc = document.getElementById('id_new_barcode_desc');
-                        barcode_desc.value = item_info['description'];
+                    if (status_code !== 200) {
+                        console.log('Error in checking barcode in db');
+                        return false;
                     }
 
-                }
+                    return result
+                }).then(result => {
+                    console.log(result);
 
-            }).catch(error => {
-                console.log(error)
-            })
+                    let initial_input_div = document.getElementById('id_initial_scan_input');
+                    let new_input_div = document.getElementById('id_new_item_div');
+                    let new_barcode_input = document.getElementById('id_new_barcode_nbr');
+                    let name_field_input = document.getElementById('id_name_input');
+
+                    if (result['user_features_list'].includes("cost_tracking")) {
+                        let new_barcode_cost_div = document.getElementById('id_cost_div');
+                        new_barcode_cost_div.style.display = 'block';
+                    }
+
+                    let category_select = document.getElementById('id_new_item_categories');
+                    for (const val of result['categories']) {
+                        let option = document.createElement("option");
+                        option.value = val;
+                        option.text = val;
+                        category_select.add(option);
+                        console.log(val);
+                    }
+
+                    initial_input_div.style.display = 'none';
+                    new_input_div.style.display = 'block';
+
+                    if (barcode_field_value){
+                        new_barcode_input.value = barcode_field_value;
+                    } else if (name_field_value) {
+                        name_field_input.value = name_field_value;
+                    }
+
+                    if (result['exists'] === true) {
+                        let item_info = result['item_info'];
+
+                        let barcode_nbr = document.getElementById('id_new_barcode_nbr');
+                        let barcode_name = document.getElementById('id_new_barcode_name');
+                        let barcode_qty = document.getElementById('id_new_barcode_qty');
+                        let barcode_category = document.getElementById('id_new_item_categories');
+                        let h2_header = document.getElementById('id_scanned_div_h2');
+
+                        barcode_name.value = item_info['name'];
+                        barcode_qty.value = item_info['default_quantity']
+                        barcode_category.value = item_info['category']
+                        barcode_nbr.value = item_info['barcode']
+
+                        h2_header.innerText = 'Previously Scanned Item';
+
+                        if (item_info['description']) {
+                            let barcode_desc = document.getElementById('id_new_barcode_desc');
+                            barcode_desc.value = item_info['description'];
+                        }
+
+                    }
+
+                }).catch(error => {
+                    console.log(error)
+                })
+            } else {
+                alert('Please at minimum a Barcode or Name for product being entered.')
+            }
         }
 
         async function add_new_barcode() {
@@ -154,12 +169,16 @@
 
     <div id="id_initial_scan_input" class="m-4 mx-auto p-4 rounded-xl shadow-2xl bg-gray-50 w-4/5"
          style="display: block">
-        <h2 class="text-2xl">Scan Barcode</h2>
+        <h2 class="text-2xl">Scan Barcode or Enter Item Name</h2>
         <label for="id_barcode_input">Barcode: </label>
         <input id="id_barcode_input"
                class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <label for="id_name_input">Name: </label>
+        <input id="id_name_input"
+               class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <br>
         <br><br>
-        <button onclick="check_barcode_entry()"
+        <button onclick="check_initial_data_entry()"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg">
             Enter Barcode
         </button>

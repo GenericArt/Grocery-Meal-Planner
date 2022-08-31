@@ -1,4 +1,4 @@
-from .models import IngredientCategory, IngredientIcon, AppFeatureList, UserFeatureList
+from .models import IngredientCategory, IngredientIcon, AppFeatureList, UserFeatureList, UnitsOfMeasurement
 from Users.models import UserAuth
 from django.conf import settings
 import os, tempfile
@@ -10,6 +10,8 @@ def run_all_intializations():
     create_default_app_features_list()
     create_test_user()
     set_test_user_features()
+    create_uom()
+    print("Done")
 
 
 def create_default_item_categories():
@@ -39,6 +41,8 @@ def create_test_user():
     user = User.objects.create_user(email='manley@me.com', password='foobar')
     user.is_superuser = False
     user.is_staff = False
+    user.first_name = 'Test'
+    user.last_name = 'User'
     user.save()
 
     user.user_id = user.id
@@ -54,6 +58,25 @@ def set_test_user_features():
             user_id=test_user.user_id,
             feature=feature,
             enabled=False
+        )
+        new_entry.save()
+
+
+def create_uom():
+    metric_liquid_list = ['Liter', 'Millilitres']
+    imperial_liquid_list = ['Gallon', 'Quart', 'Pint', 'Ounce', 'Cup', 'tbsp', 'tsp']
+
+    for imperial_unit in imperial_liquid_list:
+        new_entry = UnitsOfMeasurement.objects.create(
+            name=imperial_unit,
+            system='I'
+        )
+        new_entry.save()
+
+    for metric_unit in metric_liquid_list:
+        new_entry = UnitsOfMeasurement.objects.create(
+            name=metric_unit,
+            system='M'
         )
         new_entry.save()
 

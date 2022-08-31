@@ -47,13 +47,15 @@ def log_user_out(request):
 
 
 @csrf_exempt
-def check_scanned_barcode(request):
+def check_initial_data_entry(request):
     if request.user.is_authenticated:
         if request.method == 'POST':
             post_data = json.loads(request.body.decode("utf-8"))
+            exists = False
             print(post_data)
 
             scanned_barcode = str(post_data['barcode']).strip()
+            name_entered = str(post_data['name']).strip()
             item_info = {}
 
             user_id = request.user.id
@@ -61,19 +63,37 @@ def check_scanned_barcode(request):
             user_features_list = [x.feature.feature_name for x in user_features]
 
             # check if barcode exists
-            check_barcode_exist = IngredientItem.objects.filter(barcode=scanned_barcode, id=request.user.id)
-            if check_barcode_exist:
-                exists = True
+            if scanned_barcode:
+                check_barcode_exist = IngredientItem.objects.filter(barcode=scanned_barcode, id=request.user.id)
+                if check_barcode_exist:
+                    exists = True
 
-                existing_item = check_barcode_exist[0]
-                item_info['name'] = existing_item.name
-                item_info['category'] = existing_item.category.name
-                item_info['default_quantity'] = existing_item.default_quantity
-                item_info['barcode'] = existing_item.barcode
+                    existing_item = check_barcode_exist[0]
+                    item_info['name'] = existing_item.name
+                    item_info['category'] = existing_item.category.name
+                    item_info['default_quantity'] = existing_item.default_quantity
+                    item_info['barcode'] = existing_item.barcode
 
-                if existing_item.description:
-                    item_info['description'] = existing_item.description
+                    if existing_item.description:
+                        item_info['description'] = existing_item.description
 
+                else:
+                    exists = False
+            elif name_entered:
+                check_name_exists = IngredientItem.objects.filter(name=name_entered, id=request.user.id)
+                if check_name_exists:
+                    exists = True
+
+                    existing_item = check_name_exists[0]
+                    item_info['name'] = existing_item.name
+                    item_info['category'] = existing_item.category.name
+                    item_info['default_quantity'] = existing_item.default_quantity
+                    item_info['barcode'] = existing_item.barcode
+
+                    if existing_item.description:
+                        item_info['description'] = existing_item.description
+                else:
+                    exists = False
             else:
                 exists = False
 

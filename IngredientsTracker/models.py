@@ -2,7 +2,6 @@ from django.db import models
 from .validators import validate_file_extension
 
 
-# Ended up not using this for now as it dampens the user experience.
 class Store(models.Model):
     id = models.AutoField(primary_key=True)
     store_name = models.CharField(max_length=200)
@@ -40,17 +39,30 @@ class IngredientIcon(models.Model):
         managed = True
 
 
-# todo Optionally track cost of items
+class UnitsOfMeasurement(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True)
+    system = models.CharField(max_length=20)
+
+    class Meta:
+        ordering = ['id']
+        db_table = 'units_of_measurement'
+        managed = True
+
+
 class IngredientItem(models.Model):
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField(null=True)
     icon = models.ForeignKey(IngredientIcon, null=True, related_name='icon_data', on_delete=models.PROTECT)
     ingredient_id = models.IntegerField(null=True)
-    barcode = models.CharField(max_length=20)
+    barcode = models.CharField(max_length=20, null=True)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True)
     category = models.ForeignKey(IngredientCategory, related_name='category_data', on_delete=models.PROTECT)
     default_quantity = models.FloatField(null=True)
+    uom = models.ForeignKey(UnitsOfMeasurement, null=True, related_name='uom_data', on_delete=models.PROTECT)
+    store = models.ForeignKey(Store, null=True, related_name='store_location', on_delete=models.PROTECT)
     date_created = models.DateField(auto_now=True)
 
     class Meta:
@@ -79,6 +91,7 @@ class IngredientInventory(models.Model):
     quantity = models.FloatField()
     cost = models.ForeignKey(IngredientCostLogging, related_name='ingredient_cost_data',
                              on_delete=models.PROTECT, null=True)
+    store = models.ForeignKey(Store, null=True, related_name='store_data', on_delete=models.PROTECT)
     expiration_date = models.DateField()
     date_created = models.DateField(auto_now=True)
 
