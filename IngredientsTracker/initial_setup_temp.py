@@ -26,7 +26,10 @@ def create_default_item_categories():
 
 def create_default_app_features_list():
     feature_list = {'cost_tracking': 'This feature enables things like cost history trends and how many meals'
-                                     'something went into'}
+                                     'something went into',
+                    'quantity_tracking': 'Enables the ability to track exact quantities of items bought. This can be '
+                                         'down to how many carrots are in the bag you bought. This feature is aimed '
+                                         'at the people who want to know every little detail about what they have.'}
 
     for feature, desc in feature_list.items():
         new_entry = AppFeatureList.objects.create(
@@ -63,8 +66,8 @@ def set_test_user_features():
 
 
 def create_uom():
-    metric_liquid_list = ['Liter', 'Millilitres']
-    imperial_liquid_list = ['Gallon', 'Quart', 'Pint', 'Ounce', 'Cup', 'tbsp', 'tsp']
+    metric_liquid_list = ['Liter', 'Millilitres', 'Each']
+    imperial_liquid_list = ['Gallon', 'Quart', 'Pint', 'Ounce', 'Cup', 'tbsp', 'tsp', 'Each']
 
     for imperial_unit in imperial_liquid_list:
         new_entry = UnitsOfMeasurement.objects.create(

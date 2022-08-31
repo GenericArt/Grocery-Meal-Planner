@@ -43,7 +43,7 @@
                     let initial_input_div = document.getElementById('id_initial_scan_input');
                     let new_input_div = document.getElementById('id_new_item_div');
                     let new_barcode_input = document.getElementById('id_new_barcode_nbr');
-                    let name_field_input = document.getElementById('id_name_input');
+                    let name_field_input = document.getElementById('id_new_barcode_name');
 
                     if (result['user_features_list'].includes("cost_tracking")) {
                         let new_barcode_cost_div = document.getElementById('id_cost_div');
@@ -59,14 +59,20 @@
                         console.log(val);
                     }
 
+                    let amount_remaining_select = document.getElementById('id_new_amount_remaining');
+                    for (const val of result['amount_remaining_list']) {
+                        let option = document.createElement("option");
+                        option.value = val;
+                        option.text = val;
+                        amount_remaining_select.add(option);
+                        console.log(val);
+                    }
+
                     initial_input_div.style.display = 'none';
                     new_input_div.style.display = 'block';
 
-                    if (barcode_field_value){
-                        new_barcode_input.value = barcode_field_value;
-                    } else if (name_field_value) {
-                        name_field_input.value = name_field_value;
-                    }
+                    new_barcode_input.value = barcode_field_value;
+                    name_field_input.value = name_field_value;
 
                     if (result['exists'] === true) {
                         let item_info = result['item_info'];
@@ -106,6 +112,7 @@
             let barcode_desc = document.getElementById('id_new_barcode_desc').value;
             let barcode_expire = document.getElementById('id_new_barcode_expire').value;
             let barcode_category = document.getElementById('id_new_item_categories').value;
+            let barcode_amount_remaining = document.getElementById('id_new_amount_remaining').value;
 
             let barcode_cost_element = document.getElementById('id_new_barcode_cost');
             if (barcode_cost_element.style.display === 'block') {
@@ -133,6 +140,7 @@
                         'quantity': barcode_qty,
                         'expire_date': barcode_expire,
                         'category': barcode_category,
+                        'amount_remaining': barcode_amount_remaining,
                     }),
                 }).then(response => {
                     let result = response.json();
@@ -212,9 +220,11 @@
                                                                      placeholder="Optional..."
                                                                      class="rounded my-4">
         <br>
-        <label for="id_new_barcode_qty">Quantity: </label><input id="id_new_barcode_qty" type="number"
-                                                                 class="rounded my-4">
-        <br>
+        <div id="id_quantity_div" style="display: none">
+            <label for="id_new_barcode_qty">Quantity: </label><input id="id_new_barcode_qty" type="number"
+                                                                     class="rounded my-4">
+            <br>
+        </div>
         <div id="id_cost_div" style="display: none">
             <label for="id_new_barcode_cost">Cost: </label><input id="id_new_barcode_cost" type="number"
                                                                   class="rounded my-4">
@@ -225,6 +235,10 @@
         <br>
         <label for="id_new_item_categories">Choose Category:</label>
         <select name="id_new_item_categories" id="id_new_item_categories" class="rounded">
+        </select>
+        <br><br>
+        <label for="id_new_amount_remaining">Choose Amount Remaining:</label>
+        <select name="id_new_amount_remaining" id="id_new_amount_remaining" class="rounded">
         </select>
         <br>
         <button onclick="add_new_barcode()"

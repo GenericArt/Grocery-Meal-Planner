@@ -106,6 +106,7 @@ def check_initial_data_entry(request):
                 'item_info': item_info,
                 'categories': list(IngredientCategory.objects.all().values_list('name', flat=True)),
                 'user_features_list': user_features_list,
+                'amount_remaining_list': [x[1] for x in IngredientInventory._meta.get_field('amount_remaining').choices],
             }
 
             return JsonResponse(context, status=200)

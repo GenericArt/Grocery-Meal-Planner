@@ -84,15 +84,79 @@ class IngredientCostLogging(models.Model):
         managed = True
 
 
+class MealsMadeHistory(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_id = models.IntegerField(null=True)
+    meal_name = models.CharField(max_length=250)
+
+    class Meta:
+        ordering = ['id']
+        db_table = 'meals_made_history'
+        managed = True
+
+
+class Student(models.Model):
+    FRESHMAN = 'FR'
+    SOPHOMORE = 'SO'
+    JUNIOR = 'JR'
+    SENIOR = 'SR'
+    GRADUATE = 'GR'
+    YEAR_IN_SCHOOL_CHOICES = [
+        (FRESHMAN, 'Freshman'),
+        (SOPHOMORE, 'Sophomore'),
+        (JUNIOR, 'Junior'),
+        (SENIOR, 'Senior'),
+        (GRADUATE, 'Graduate'),
+    ]
+    year_in_school = models.CharField(
+        max_length=2,
+        choices=YEAR_IN_SCHOOL_CHOICES,
+        default=FRESHMAN,
+    )
+
+    def is_upperclass(self):
+        return self.year_in_school in {self.JUNIOR, self.SENIOR}
+
+
 class IngredientInventory(models.Model):
+    HUNDRED = 10
+    NINETY = 9
+    EIGHTY = 8
+    SEVENTY = 7
+    SIXTY = 6
+    FIFTY = 5
+    FORTY = 4
+    THIRTY = 3
+    TWENTY = 2
+    TEN = 1
+    AMOUNT_LEFT_CHOICES = [
+        (HUNDRED, '%100'),
+        (NINETY, '%90'),
+        (EIGHTY, '%80'),
+        (SEVENTY, '%70'),
+        (SIXTY, '%60'),
+        (FIFTY, '%50'),
+        (FORTY, '%40'),
+        (THIRTY, '%30'),
+        (TWENTY, '%20'),
+        (TEN, '%10'),
+    ]
+
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField(null=True)
     ingredient_id = models.ForeignKey(IngredientItem, related_name='ingredient_data', on_delete=models.PROTECT)
-    quantity = models.FloatField()
+    amount_remaining = models.CharField(
+        max_length=10,
+        choices=AMOUNT_LEFT_CHOICES,
+        default=HUNDRED
+    )
+    quantity = models.FloatField(null=True)
     cost = models.ForeignKey(IngredientCostLogging, related_name='ingredient_cost_data',
                              on_delete=models.PROTECT, null=True)
     store = models.ForeignKey(Store, null=True, related_name='store_data', on_delete=models.PROTECT)
     expiration_date = models.DateField()
+    meals_used_in = models.ForeignKey(MealsMadeHistory, null=True, related_name='meals_used_in_data',
+                                      on_delete=models.PROTECT)
     date_created = models.DateField(auto_now=True)
 
     class Meta:
