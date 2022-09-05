@@ -46,7 +46,7 @@ def validate_user_login(request):
 
 def log_user_out(request):
     logout(request)
-    return redirect('/loginpage')
+    return redirect('loginpage/')
 
 
 @csrf_exempt
